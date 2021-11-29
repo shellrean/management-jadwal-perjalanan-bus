@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\BusController;
 use App\Http\Controllers\Api\SupirController;
 use App\Http\Controllers\Api\TerminalController;
 use App\Http\Controllers\Api\RuteController;
+use App\Http\Controllers\Api\JadwalController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,3 +24,4 @@ Route::apiResource('buses', BusController::class);
 Route::apiResource('supirs', SupirController::class);
 Route::apiResource('terminals', TerminalController::class);
 Route::apiResource('rutes', RuteController::class);
+Route::apiResource('jadwals', JadwalController::class);
