@@ -15,7 +15,7 @@ class SupirController extends Controller
      */
     public function index()
     {
-        $supirs = Supir::paginate();
+        $supirs = Supir::paginate(5);
         return response()->json($supirs);
     }
 
