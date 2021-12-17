@@ -15,7 +15,7 @@ class TerminalController extends Controller
      */
     public function index()
     {
-        $terminals = Terminal::paginate();
+        $terminals = Terminal::orderByDesc('created_at')->paginate();
         return response()->json($terminals);
     }
 
