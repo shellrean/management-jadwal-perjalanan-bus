@@ -22,7 +22,7 @@ class RuteController extends Controller
             'asal',
             'tujuan',
             'waktu_tempuh'
-        ])->paginate(15);
+        ])->orderByDesc('created_at')->paginate(15);
         return response()->json($rutes);
     }
 
