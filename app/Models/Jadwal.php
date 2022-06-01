@@ -9,9 +9,9 @@ class Jadwal extends Model
 {
     use HasFactory;
 
-    public const NGY = "NGY";
-    public const OTW = "OTW";
-    public const AAD = "AAD";
+    public const NGY = "NGY"; // Not Going Yet
+    public const OTW = "OTW"; // On The Way
+    public const AAD = "AAD"; // Arrival At Destination
     public const CANCEL = "CANCEL";
 
     protected  $guarded = [];

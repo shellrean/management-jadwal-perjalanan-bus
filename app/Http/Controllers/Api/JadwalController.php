@@ -7,6 +7,7 @@ use App\Models\Jadwal;
 use App\Models\Rute;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class JadwalController extends Controller
 {
@@ -17,7 +18,20 @@ class JadwalController extends Controller
      */
     public function index()
     {
-        $jadwal = Jadwal::whereDate('berangkat', now())->paginate(15);
+        $jadwal = DB::table('jadwals as t_0')
+            ->join('buses as t_1', 't_0.bus_id', 't_1.id')
+            ->join('supirs as t_2', 't_0.supir_id', 't_2.id')
+            ->join('rutes as t_3', 't_0.rute_id', 't_3.id')
+            ->whereDate('t_0.berangkat', now())
+            ->select([
+                't_0.*',
+                't_1.bus_number',
+                't_2.no_reg as supir_no_reg',
+                't_2.nama_lengkap as supir_nama_lengkap',
+                't_3.kode as rute_kode',
+                't_3.waktu_tempuh as rute_waktu_tempuh'
+            ])
+            ->paginate(15);
         return response()->json($jadwal);
     }
 
@@ -76,7 +90,8 @@ class JadwalController extends Controller
             'bus_id' => 'required|exists:buses,id',
             'supir_id' => 'required|exists:supirs,id',
             'rute_id' => 'required|exists:rutes,id',
-            'berangkat' => 'required'
+            'berangkat' => 'required',
+            'status' => 'required'
         ]);
 
         $rute = Rute::find($request->rute_id);
@@ -88,6 +103,7 @@ class JadwalController extends Controller
         $jadwal->rute_id = $request->rute_id;
         $jadwal->berangkat = $berangkat;
         $jadwal->tiba = $tiba;
+        $jadwal->status = $request->status;
         $jadwal->save();
 
         return response()->json($jadwal);

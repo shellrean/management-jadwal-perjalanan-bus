@@ -47,7 +47,7 @@ class RuteController extends Controller
             'tujuan' => 'required',
             'kode' => 'required',
             'waktu_tempuh' => 'required|int',
-            'checkpoints' => 'required|array'
+            'checkpoints' => 'array'
         ]);
 
         $rute = Rute::create([
@@ -128,7 +128,7 @@ class RuteController extends Controller
             'tujuan' => 'required',
             'kode' => 'required',
             'waktu_tempuh' => 'required|int',
-            'checkpoints' => 'required|array'
+            'checkpoints' => 'array'
         ]);
 
         $rute->asal = $request->asal;
