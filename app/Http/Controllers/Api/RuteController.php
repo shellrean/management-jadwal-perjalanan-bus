@@ -54,22 +54,23 @@ class RuteController extends Controller
             'asal' => $request->asal,
             'tujuan' => $request->tujuan,
             'kode' => $request->kode,
-            'waktu_tempuh' => $request->waktu_tempuh,
-            'checkpoints' => json_encode($request->checkpoints)
+            'waktu_tempuh' => $request->waktu_tempuh
         ]);
 
-        $rute->checkpoints = json_decode($rute->checkpoints, true);
+        $rute_checkpoints = [];
+        foreach($request->checkpoints as $checkpoint) {
+            $rute_checkpoints[] = [
+                'checkpoint_code' => $checkpoint['code'],
+                'terminal_id' => $checkpoint['id'],
+                'rute_id' => $rute->id,
+                'waktu' => $checkpoint['waktu'],
+                'created_at' => now(),
+                'updated_at' => now()
+            ];
+        }
+        DB::table('rute_checkpoints')->insert($rute_checkpoints);
 
-        $terminals = Terminal::whereIn('id', array_column($rute->checkpoints, "id"))
-            ->select('id', 'kode', 'nama', 'alamat', 'tipe')
-            ->get();
-
-        $rute->checkpoints = array_map(function($item) use ($terminals) {
-            $item['terminal'] = $terminals->where('id', $item['id'])->first();
-            return $item;
-        }, $rute->checkpoints);
-
-        return response()->json($rute);
+        return response()->json(['message' => 'rute berhasil disimpan']);
     }
 
     /**
@@ -86,7 +87,6 @@ class RuteController extends Controller
             ->select([
                 't_0.id',
                 't_0.kode',
-                't_0.checkpoints',
                 't_1.id as asal',
                 't_1.provinsi as asal_provinsi',
                 't_1.kode as asal_kode',
@@ -101,15 +101,16 @@ class RuteController extends Controller
             ])
             ->where('t_0.id', $id)->first();
 
-        $checkpoints = json_decode($rute->checkpoints, true);
-        $terminals = Terminal::whereIn('id', array_column($checkpoints, "id"))
+        $checkpoints = DB::table('rute_checkpoints')->where('rute_id', $id)->get();
+
+        $terminals = Terminal::whereIn('id', $checkpoints->pluck('terminal_id'))
             ->select('id', 'kode', 'nama', 'alamat', 'tipe')
             ->get();
 
         $rute->checkpoints = array_map(function($item) use ($terminals) {
-            $item['terminal'] = $terminals->where('id', $item['id'])->first();
+            $item->terminal = $terminals->where('id', $item->terminal_id)->first();
             return $item;
-        }, $checkpoints);
+        }, $checkpoints->toArray());
 
         return $rute;
     }
@@ -135,8 +136,21 @@ class RuteController extends Controller
         $rute->tujuan = $request->tujuan;
         $rute->kode = $request->kode;
         $rute->waktu_tempuh = $request->waktu_tempuh;
-        $rute->checkpoints = json_encode($request->checkpoints);
         $rute->save();
+
+        DB::table('rute_checkpoints')->where('rute_id', $rute->id)->delete();
+        $rute_checkpoints = [];
+        foreach($request->checkpoints as $checkpoint) {
+            $rute_checkpoints[] = [
+                'checkpoint_code' => $checkpoint['code'],
+                'terminal_id' => $checkpoint['id'],
+                'rute_id' => $rute->id,
+                'waktu' => $checkpoint['waktu'],
+                'created_at' => now(),
+                'updated_at' => now()
+            ];
+        }
+        DB::table('rute_checkpoints')->insert($rute_checkpoints);
 
         return response()->json(['message' => 'data updated']);
     }
@@ -150,6 +164,7 @@ class RuteController extends Controller
     public function destroy(Rute $rute)
     {
         $rute->delete();
+        DB::table('rute_checkpoints')->where('rute_id', $rute->id)->delete();
         return response()->json(['message' => 'rute deleted']);
     }
 }

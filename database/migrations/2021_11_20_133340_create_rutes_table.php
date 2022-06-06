@@ -19,7 +19,6 @@ class CreateRutesTable extends Migration
             $table->unsignedBigInteger('tujuan');
             $table->string('kode');
             $table->integer('waktu_tempuh')->comment('waktu tempuh in minutes');
-            $table->text('checkpoints');
             $table->timestamps();
         });
     }
