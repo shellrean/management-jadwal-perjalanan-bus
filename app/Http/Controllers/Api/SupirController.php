@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Supir;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SupirController extends Controller
 {
@@ -13,9 +14,16 @@ class SupirController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $supirs = Supir::orderByDesc('created_at')->paginate(5);
+        $q = $request->get('q');
+        $supirs = DB::table('supirs')
+            ->where(function($query) use($q) {
+                $query->where('no_reg', 'like', '%'.$q.'%')
+                    ->orWhere('nama_lengkap', 'like', '%'.$q.'%');
+            })
+            ->orderByDesc('created_at')
+            ->paginate(5);
         return response()->json($supirs);
     }
 

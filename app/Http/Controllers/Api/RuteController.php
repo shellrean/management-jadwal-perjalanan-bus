@@ -15,8 +15,9 @@ class RuteController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
+        $q = $request->get('q');
         $rutes = DB::table('rutes as t_0')
             ->join('terminals as t_1', 't_0.asal', 't_1.id')
             ->join('terminals as t_2', 't_0.tujuan', 't_2.id')
@@ -30,7 +31,9 @@ class RuteController extends Controller
                 't_2.kode as tujuan_kode',
                 't_2.nama as tujuan_nama',
                 't_0.waktu_tempuh'
-            ])->orderBy('t_0.created_at')->paginate(15);
+            ])->orderBy('t_0.created_at')
+            ->where('t_0.kode', 'like', '%'.$q.'%')
+            ->paginate(15);
         return response()->json($rutes);
     }
 

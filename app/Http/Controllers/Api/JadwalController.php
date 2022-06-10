@@ -16,13 +16,13 @@ class JadwalController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
+        $q = $request->get('q');
         $jadwal = DB::table('jadwals as t_0')
             ->join('buses as t_1', 't_0.bus_id', 't_1.id')
             ->join('supirs as t_2', 't_0.supir_id', 't_2.id')
             ->join('rutes as t_3', 't_0.rute_id', 't_3.id')
-            ->whereDate('t_0.berangkat', now())
             ->select([
                 't_0.*',
                 't_1.bus_number',
@@ -30,8 +30,13 @@ class JadwalController extends Controller
                 't_2.nama_lengkap as supir_nama_lengkap',
                 't_3.kode as rute_kode',
                 't_3.waktu_tempuh as rute_waktu_tempuh'
-            ])
-            ->paginate(15);
+            ]);
+        if($q == "") {
+            $jadwal = $jadwal->whereDate('berangkat', now());
+        } else {
+            $jadwal = $jadwal->whereDate('berangkat', $q);
+        }
+        $jadwal = $jadwal->paginate(15);
         return response()->json($jadwal);
     }
 

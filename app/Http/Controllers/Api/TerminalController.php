@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Terminal;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TerminalController extends Controller
 {
@@ -13,9 +14,18 @@ class TerminalController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $terminals = Terminal::orderByDesc('created_at')->paginate();
+        $q = $request->get('q');
+        $terminals = DB::table('terminals')
+            ->where(function($query) use ($q) {
+                $query->where('kode', 'like', '%'.$q.'%')
+                    ->orWhere('nama', 'like', '%'.$q.'%')
+                    ->orWhere('tipe', 'like', '%'.$q.'%');
+            })
+            ->orderByDesc('created_at')
+            ->paginate();
+
         return response()->json($terminals);
     }
 
