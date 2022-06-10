@@ -5,12 +5,22 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Bus;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class BusController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $buses = Bus::orderByDesc('created_at')->paginate(5);
+        $q = $request->get('q');
+        $buses = DB::table('buses')
+            ->where(function($query) use($q) {
+                $query->where('plat_number', 'like', '%'.$q.'%')
+                    ->orWhere('bus_number', 'like', '%'.$q.'%')
+                    ->orWhere('distributor', 'like', '%'.$q.'%');
+            })
+            ->orderByDesc('created_at')
+            ->paginate(5);
+
         return response()->json($buses);
     }
 
